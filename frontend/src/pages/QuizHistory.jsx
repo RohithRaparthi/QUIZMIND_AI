@@ -121,7 +121,7 @@ const QuizHistory = () => {
                     </td>
                     <td>
                       <span className={`badge badge-${item.provider_used.toLowerCase()}`}>
-                        {item.provider_used === 'grok' ? 'xAI Grok' : 'Google Gemini'}
+                        {item.provider_used.toLowerCase() === 'grok' ? 'xAI Grok' : item.provider_used.toLowerCase() === 'groq' ? 'Groq' : 'Google Gemini'}
                       </span>
                     </td>
                     <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>

@@ -85,6 +85,7 @@ class QuizSubmitResponse(BaseModel):
     provider_used: str
     attempted_at: datetime
     results: List[QuestionResultOut]
+    xp_updates: Optional['XPUpdateOut'] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -137,3 +138,87 @@ class AnalyticsResponse(BaseModel):
     topic_performance: List[TopicPerformance]
     difficulty_performance: List[DifficultyPerformance]
     accuracy_trend: List[AccuracyTrendItem]
+
+# --- Progression & Challenge Schemas ---
+
+class ChallengeProfileOut(BaseModel):
+    username: str
+    total_xp: int
+    current_streak: int
+    best_streak: int
+    quizzes_completed: int
+    questions_answered: int
+    last_activity_date: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ChallengeProgressOut(BaseModel):
+    level_number: int
+    level_name: str
+    total_xp: int
+    xp_for_current_level: int
+    xp_for_next_level: int
+    progress_percent: float
+    xp_remaining: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AchievementOut(BaseModel):
+    id: str
+    name: str
+    description: str
+    category: str
+    xp_reward: int
+    icon_name: str
+    earned: bool
+    earned_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ActivityLogOut(BaseModel):
+    id: int
+    activity_type: str
+    xp_earned: int
+    metadata: Optional[dict] = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class HeatmapItem(BaseModel):
+    date: str
+    count: int
+
+class LearningInsights(BaseModel):
+    strongest_topic: str
+    weakest_topic: str
+    avg_accuracy: float
+    improvement_trend: float
+
+class ChallengeDashboardOut(BaseModel):
+    profile: ChallengeProfileOut
+    progress: ChallengeProgressOut
+    achievements: List[AchievementOut]
+    recent_activity: List[ActivityLogOut]
+    heatmap: List[HeatmapItem]
+    insights: LearningInsights
+
+    model_config = ConfigDict(from_attributes=True)
+
+class UnlockedAchievementOut(BaseModel):
+    id: str
+    name: str
+    description: str
+    xp_reward: int
+    icon_name: str
+    category: str
+
+class XPUpdateOut(BaseModel):
+    xp_earned: int
+    new_total_xp: int
+    previous_level: int
+    current_level: int
+    level_name: str
+    level_up: bool
+    unlocked_achievements: List[UnlockedAchievementOut]
+
+    model_config = ConfigDict(from_attributes=True)

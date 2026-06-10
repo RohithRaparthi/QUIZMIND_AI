@@ -80,18 +80,16 @@ const RegisterPage = () => {
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '0.75rem'
-          }}>
-            <BrainCircuit size={24} color="white" />
-          </div>
+          <img 
+            src="/favicon.svg" 
+            alt="QuizMind AI Logo" 
+            style={{
+              width: '42px',
+              height: '42px',
+              objectFit: 'contain',
+              marginBottom: '0.75rem'
+            }}
+          />
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Get Started</h2>
           <p style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>Create your free QuizMind AI account</p>
         </div>

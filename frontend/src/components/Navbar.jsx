@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { User, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ThemeSelector from './ThemeSelector';
 
 const Navbar = ({ title }) => {
   const { user, logout } = useAuth();
@@ -20,6 +21,7 @@ const Navbar = ({ title }) => {
       
       {user && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <ThemeSelector />
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div style={{
               width: '32px',

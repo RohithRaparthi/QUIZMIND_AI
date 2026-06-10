@@ -8,24 +8,48 @@ import {
   Trophy, CheckCircle2, XCircle, ArrowRight, RotateCcw, 
   Sparkles, Info, Quote, BrainCircuit, ChevronDown, ChevronUp 
 } from 'lucide-react';
+import { useChallenge } from '../context/ChallengeContext';
+import AchievementUnlockModal from '../components/AchievementUnlockModal';
 
 const ResultsPage = () => {
   const { quizId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { mode, handleQuizSubmissionSuccess } = useChallenge();
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedQuestions, setExpandedQuestions] = useState({});
+
+  // Achievement unlock queue
+  const [activeUnlock, setActiveUnlock] = useState(null);
+  const [unlockQueue, setUnlockQueue] = useState([]);
+
+  useEffect(() => {
+    if (unlockQueue.length > 0 && !activeUnlock) {
+      const next = unlockQueue[0];
+      setActiveUnlock(next);
+      setUnlockQueue(prev => prev.slice(1));
+    }
+  }, [unlockQueue, activeUnlock]);
 
   useEffect(() => {
     const loadResults = async () => {
       setError(null);
       // Check if results were passed via navigation state
       if (location.state?.results) {
-        setResults(location.state.results);
+        const resData = location.state.results;
+        setResults(resData);
         setLoading(false);
+        
+        // Notify challenge context to update stats
+        if (resData.xp_updates) {
+          handleQuizSubmissionSuccess(resData.xp_updates);
+          if (resData.xp_updates.unlocked_achievements?.length > 0) {
+            setUnlockQueue(resData.xp_updates.unlocked_achievements);
+          }
+        }
       } else {
         // Since there is no GET /quiz-attempts/{id} endpoint in the specification, 
         // we can fetch the user's quiz-history and grab the matching quiz attempt.
@@ -166,11 +190,38 @@ const ResultsPage = () => {
               </div>
             </div>
 
+            {/* XP Progression Feedback */}
+            {mode === 'challenge' && results.xp_updates && (
+              <div style={{
+                background: 'rgba(99, 102, 241, 0.08)',
+                border: '1px solid rgba(99, 102, 241, 0.25)',
+                borderRadius: '8px',
+                padding: '1rem',
+                marginBottom: '1.5rem',
+                textAlign: 'left'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Progress Updated</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary)' }}>
+                    +{results.xp_updates.xp_earned} XP
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Level {results.xp_updates.current_level} • {results.xp_updates.level_name}
+                  {results.xp_updates.level_up && (
+                    <span style={{ color: 'var(--success)', marginLeft: '0.5rem', fontWeight: 600 }}>
+                      Level Up!
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Provider used info */}
             <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Generated using:</span>
               <span className={`badge badge-${results.provider_used.toLowerCase()}`}>
-                {results.provider_used === 'grok' ? 'xAI Grok' : 'Google Gemini'}
+                {results.provider_used.toLowerCase() === 'grok' ? 'xAI Grok' : results.provider_used.toLowerCase() === 'groq' ? 'Groq' : 'Google Gemini'}
               </span>
             </div>
 
@@ -344,6 +395,14 @@ const ResultsPage = () => {
           })}
         </div>
       </div>
+
+      {/* Achievement Unlock Modal Overlay */}
+      {activeUnlock && (
+        <AchievementUnlockModal
+          achievement={activeUnlock}
+          onClose={() => setActiveUnlock(null)}
+        />
+      )}
     </div>
   );
 };

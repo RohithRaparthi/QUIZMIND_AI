@@ -13,13 +13,21 @@ import {
   ResponsiveContainer, BarChart, Bar, Cell 
 } from 'recharts';
 
+import { useChallenge } from '../context/ChallengeContext';
+import ChallengeDashboard from './ChallengeDashboard';
+
 const Dashboard = () => {
+  const { mode } = useChallenge();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (mode === 'challenge') {
+      setLoading(false);
+      return;
+    }
     const fetchAnalytics = async () => {
       try {
         const response = await api.get('/analytics');
@@ -32,7 +40,11 @@ const Dashboard = () => {
       }
     };
     fetchAnalytics();
-  }, []);
+  }, [mode]);
+
+  if (mode === 'challenge') {
+    return <ChallengeDashboard />;
+  }
 
   if (loading) return <LoadingSpinner message="Loading your dashboard..." />;
 

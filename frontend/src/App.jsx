@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -13,6 +14,8 @@ import QuizHistory from './pages/QuizHistory';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import LoadingSpinner from './components/LoadingSpinner';
+import { ChallengeProvider } from './context/ChallengeContext';
+import ArenaTransitionOverlay from './components/ArenaTransitionOverlay';
 
 // Route Guard for Authenticated Pages
 const PrivateRoute = ({ children }) => {
@@ -132,9 +135,14 @@ const AppRoutes = () => {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ChallengeProvider>
+            <ArenaTransitionOverlay />
+            <AppRoutes />
+          </ChallengeProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

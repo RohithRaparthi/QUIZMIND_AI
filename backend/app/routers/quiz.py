@@ -16,6 +16,7 @@ from app.schemas import (
 from app.auth import get_current_user
 from app.services.llm.manager import LLMManager
 from app.services.text_extractor import extract_text
+from app.services.challenge import ProgressService
 
 router = APIRouter(tags=["quizzes"])
 logger = logging.getLogger(__name__)
@@ -286,6 +287,19 @@ async def submit_quiz(
     quiz.status = "completed"
     await db.flush()
 
+    # Process progression update
+    xp_updates = None
+    try:
+        xp_updates = await ProgressService.process_quiz_completion(
+            db=db,
+            user_id=current_user.id,
+            quiz_attempt=new_attempt,
+            total_questions=len(questions),
+            correct_answers=score
+        )
+    except Exception as e:
+        logger.error(f"Failed to process progression update: {e}")
+
     return QuizSubmitResponse(
         attempt_id=new_attempt.id,
         quiz_id=quiz.id,
@@ -293,7 +307,8 @@ async def submit_quiz(
         percentage=new_attempt.percentage,
         provider_used=new_attempt.provider_used,
         attempted_at=new_attempt.attempted_at,
-        results=results_list
+        results=results_list,
+        xp_updates=xp_updates
     )
 
 @router.get("/quiz-history", response_model=List[QuizHistoryItem])
